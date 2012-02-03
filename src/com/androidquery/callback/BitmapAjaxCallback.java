@@ -16,15 +16,6 @@
 
 package com.androidquery.callback;
 
-import java.io.File;
-import java.lang.ref.WeakReference;
-import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
-
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -40,6 +31,15 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 
+import java.io.File;
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
+
 import com.androidquery.AQuery;
 import com.androidquery.util.AQUtility;
 import com.androidquery.util.BitmapCache;
@@ -51,6 +51,7 @@ import com.androidquery.util.RatioDrawable;
  */
 public class BitmapAjaxCallback extends AbstractAjaxCallback<Bitmap, BitmapAjaxCallback>{
 
+	private static final String TAG = BitmapAjaxCallback.class.getSimpleName();
 	private static int SMALL_MAX = 20;
 	private static int BIG_MAX = 20;
 	private static int SMALL_PIXELS = 50 * 50;
@@ -263,15 +264,22 @@ public class BitmapAjaxCallback extends AbstractAjaxCallback<Bitmap, BitmapAjaxC
 	    	
     		Options info = new Options();
     		info.inJustDecodeBounds = true;
-	        
+    		info.inSampleSize = 1;
+    		info.inScaled = false;
+    		// Find the correct scale value. It should be the power of 2.
+    		
 	    	decode(path, data, info);
 	        
 	        int dim = info.outWidth;
 	        if(!width) dim = Math.max(dim, info.outHeight);
 	        int ssize = sampleSize(dim, target);
-	       
+
 	        options = new Options();	        
-	        options.inSampleSize = ssize;	        
+//    		options.inJustDecodeBounds = false;
+    		options.inSampleSize = ssize;
+    		options.inPurgeable = true;
+    		options.inDither = false;
+    		options.inPreferredConfig = Bitmap.Config.ARGB_8888;
     	
     	}
         
@@ -297,20 +305,26 @@ public class BitmapAjaxCallback extends AbstractAjaxCallback<Bitmap, BitmapAjaxC
 	
     
     private static int sampleSize(int width, int target){
-    	
     	int result = 1;
+		width >>= 1;    	
+		while (width > target) {
+			result <<= 1;
+			width >>= 1;
+		}
     	
-    	for(int i = 0; i < 10; i++){
-    		
-    		if(width < target * 2){
-    			break;
-    		}
-    		
-    		width = width / 2;
-    		result = result * 2;
-    		
-    	}
-    	
+//    	int result = 1;
+//    	
+//    	for(int i = 0; i < 10; i++){
+//    		
+//    		if(width < target * 2){
+//    			break;
+//    		}
+//    		
+//    		width = width / 2;
+//    		result = result * 2;
+//    		
+//    	}
+//    	
     	return result;
     }
 	
@@ -585,6 +599,7 @@ public class BitmapAjaxCallback extends AbstractAjaxCallback<Bitmap, BitmapAjaxC
 				
 			}
 		}
+//		Log.d(TAG, "key url: "+url+" : "+result);
 
 		return result;
 	}
@@ -648,7 +663,7 @@ public class BitmapAjaxCallback extends AbstractAjaxCallback<Bitmap, BitmapAjaxC
 			v.setTag(AQuery.TAG_URL, url);
 			
 			if(preset != null && !cacheAvailable(v.getContext())){
-				setBitmap(url, v, preset, true);			
+				setBitmap(url, v, preset, true);
 			}else{
 				
 				setBitmap(url, v, null, true);
@@ -668,6 +683,7 @@ public class BitmapAjaxCallback extends AbstractAjaxCallback<Bitmap, BitmapAjaxC
 		}
 		
 		if(isPreset){
+//			iv.setImageBitmap(bm);
 			iv.setImageDrawable(makeDrawable(iv, bm, ratio, anchor, null, null));
 			return;
 		}
@@ -687,7 +703,6 @@ public class BitmapAjaxCallback extends AbstractAjaxCallback<Bitmap, BitmapAjaxC
 		}else{
 			bd = new BitmapDrawable(iv.getResources(), bm);
 		}
-		
 		return bd;
 		
 	}

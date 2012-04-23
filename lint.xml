@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="IconDensities">
+        <ignore path="" />
+    </issue>
+    <issue id="IconMissingDensityFolder">
+        <ignore path="" />
+    </issue>
+</lint>

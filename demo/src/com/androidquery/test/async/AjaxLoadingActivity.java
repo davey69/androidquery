@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,8 +14,11 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.xmlpull.v1.XmlPullParser;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 
 import com.androidquery.AQuery;
@@ -91,6 +95,7 @@ public class AjaxLoadingActivity extends RunSourceActivity {
 	}
 	
 	
+	
 	public void async_bytes(){
 	    
 		String url = "http://www.vikispot.com/z/images/vikispot/android-w.png";
@@ -116,6 +121,47 @@ public class AjaxLoadingActivity extends RunSourceActivity {
 				showResult(xml, status);
 			}
 			
+		});
+	        
+	}
+	
+	public void async_xpp(){
+		
+		String url = "https://picasaweb.google.com/data/feed/base/featured?max-results=8";		
+		
+		aq.progress(R.id.progress).ajax(url, XmlPullParser.class, new AjaxCallback<XmlPullParser>(){
+			
+			public void callback(String url, XmlPullParser xpp, AjaxStatus status) {
+				
+				Map<String, String> images = new LinkedHashMap<String, String>();
+				String currentTitle = null;
+				
+				try{
+				
+					int eventType = xpp.getEventType();
+			        while(eventType != XmlPullParser.END_DOCUMENT) {
+			          
+			        	if(eventType == XmlPullParser.START_TAG){
+			        		
+			        		String tag = xpp.getName();
+			        		
+			        		if("title".equals(tag)){
+			        			currentTitle = xpp.nextText();
+			        		}else if("content".equals(tag)){
+			        			String imageUrl = xpp.getAttributeValue(0);
+			        			images.put(currentTitle, imageUrl);
+			        		}
+			        	}
+			        	eventType = xpp.next();
+			        }
+				
+				}catch(Exception e){
+					AQUtility.report(e);
+				}
+				
+				showResult(images, status);
+				
+			}
 		});
 	        
 	}
@@ -217,6 +263,39 @@ public class AjaxLoadingActivity extends RunSourceActivity {
 		
 	}
 	
+	 /*
+	public void async_post2(){
+		
+        String url = "your url";
+		
+        //get your byte array or file
+        byte[] data = new byte[1000];
+        
+		Map<String, Object> params = new HashMap<String, Object>();
+		
+		//put your post params
+		params.put("paramName", data);
+		
+		AjaxCallback<byte[]> cb = new AjaxCallback<byte[]>() {
+
+            @Override
+            public void callback(String url, byte[] data, AjaxStatus status) {
+               
+            	System.out.println(data);
+            	System.out.println(status.getCode() + ":" + status.getError());
+                
+            	
+            }
+        };
+        
+        cb.url(url).type(byte[].class);
+        
+        //set Content-Length header
+        cb.params(params).header("Content-Length", Integer.toString(data.length));
+		cb.async(this);
+		
+	}
+	*/
 	
 	public void async_post_entity() throws UnsupportedEncodingException{
 		
@@ -276,6 +355,23 @@ public class AjaxLoadingActivity extends RunSourceActivity {
            
 	}	
 	
+	
+	
+	public void async_progress_dialog(){
+	    
+		ProgressDialog dialog = new ProgressDialog(this);
+		
+        dialog.setIndeterminate(true);
+        dialog.setCancelable(true);
+        dialog.setInverseBackgroundForced(false);
+        dialog.setCanceledOnTouchOutside(true);
+        dialog.setTitle("Sending...");
+		
+        String url = "http://www.google.com/uds/GnewsSearch?q=Obama&v=1.0";                
+        aq.progress(dialog).ajax(url, JSONObject.class, this, "jsonCb");
+           
+	}	
+	
 	public void async_advance(){
 	    
         String url = "http://www.google.com/uds/GnewsSearch?q=Obama&v=1.0";
@@ -302,6 +398,32 @@ public class AjaxLoadingActivity extends RunSourceActivity {
 	        
 	}	
 	
+	public void async_cookie(){
+	    
+		String url = "http://www.androidquery.com/p/doNothing";
+        
+		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();		
+		cb.url(url).type(JSONObject.class).weakHandler(this, "cookieCb");
+		
+		cb.cookie("hello", "world").cookie("foo", "bar");		
+        aq.ajax(cb);
+        
+	        
+	}		
+	
+	public void cookieCb(String url, JSONObject jo, AjaxStatus status) {
+		
+		JSONObject result = new JSONObject();
+		
+		try {
+			result.putOpt("cookies", jo.optJSONObject("cookies"));
+		} catch (JSONException e) {
+		}
+		
+		showResult(result, status);
+		
+	}
+	
 	public void async_encoding(){
 		
 		String url = "http://www.kyotojp.com/limousine-big5.html";
@@ -312,6 +434,8 @@ public class AjaxLoadingActivity extends RunSourceActivity {
 		aq.progress(R.id.progress).ajax(cb);
 		
 	}
+	
+
 	
 	public void encodingCb(String url, String html, AjaxStatus status){
 		
@@ -350,6 +474,44 @@ public class AjaxLoadingActivity extends RunSourceActivity {
             }
         });
 	}
+	
+	
+	public void async_rcookies(){
+	    
+		String url = "http://www.google.com";
+		aq.progress(R.id.progress).ajax(url, String.class, this, "rcookieCb");
+        
+	        
+	}		
+	
+	public void rcookieCb(String url, String html, AjaxStatus status) {
+		
+		if(html != null){
+			
+			showResult(status.getCookies(), status);
+			
+		}
+		
+	}
+	
+	public void async_rheaders(){
+	    
+		String url = "http://www.google.com";
+		aq.progress(R.id.progress).ajax(url, String.class, this, "rheaderCb");
+        
+	        
+	}		
+	
+	public void rheaderCb(String url, String html, AjaxStatus status) {
+		
+		if(html != null){
+			
+			showResult(status.getHeaders(), status);
+			
+		}
+		
+	}
+	
 	
 	public void async_error(){
 		

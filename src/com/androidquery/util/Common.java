@@ -16,9 +16,6 @@
 
 package com.androidquery.util;
 
-import java.io.File;
-import java.util.Comparator;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.graphics.Bitmap;
@@ -38,7 +35,9 @@ import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.Gallery;
 import android.widget.ListAdapter;
-import android.widget.ListView;
+
+import java.io.File;
+import java.util.Comparator;
 
 import com.androidquery.AQuery;
 import com.androidquery.callback.BitmapAjaxCallback;
@@ -269,13 +268,14 @@ public class Common implements Comparator<File>, Runnable, OnClickListener, OnLo
 	private void onScrollStateChanged2(AbsListView lv, int scrollState){
 		
 		lv.setTag(AQuery.TAG_NUM, scrollState);
+		AQUtility.debug("scrollstate changed: "+ scrollState);
 		
 		if(scrollState == SCROLL_STATE_IDLE){
 			
 			int first = lv.getFirstVisiblePosition();
 			int last = lv.getLastVisiblePosition();
 			
-			//AQUtility.debug(first, last);
+			AQUtility.debug(first, last);
 			
 			int count = last - first;
 			
@@ -288,14 +288,14 @@ public class Common implements Comparator<File>, Runnable, OnClickListener, OnLo
 				View convertView = lv.getChildAt(i);
 				Number targetPacked = (Number) convertView.getTag(AQuery.TAG_NUM);
 				
-				//AQUtility.debug("checking packed", targetPacked);
+				AQUtility.debug("checking packed", targetPacked);
 				
 				//if(targetPacked != null && (targetPacked.longValue() == packed || targetPacked.intValue() == -1)){
 				if(targetPacked != null){
 					la.getView((int) packed, convertView, lv);
 					convertView.setTag(AQuery.TAG_NUM, null);
 				}else{
-					//AQUtility.debug("skip!");
+					AQUtility.debug("skip!");
 				}
 					
 			}
@@ -315,6 +315,7 @@ public class Common implements Comparator<File>, Runnable, OnClickListener, OnLo
 		OnScrollListener sl = (OnScrollListener) parent.getTag(AQuery.TAG_SCROLL_LISTENER);
 		
 		if(sl == null){
+			AQUtility.debug("add new ScrollListener");
 			sl = new Common();
 			lv.setOnScrollListener(sl);
 			parent.setTag(AQuery.TAG_SCROLL_LISTENER, sl);
@@ -322,6 +323,7 @@ public class Common implements Comparator<File>, Runnable, OnClickListener, OnLo
 		
 		Integer scrollState = (Integer) lv.getTag(AQuery.TAG_NUM);
 		
+		AQUtility.debug("scrollstate: "+ scrollState);
 		if(scrollState == null || scrollState == OnScrollListener.SCROLL_STATE_IDLE || scrollState == OnScrollListener.SCROLL_STATE_TOUCH_SCROLL){
 			return false;
 		}

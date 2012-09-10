@@ -16,8 +16,6 @@
 
 package com.androidquery.util;
 
-import java.io.InputStream;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Picture;
@@ -26,6 +24,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebView.PictureListener;
 import android.webkit.WebViewClient;
+
+import java.io.InputStream;
 
 import com.androidquery.AQuery;
 
@@ -47,7 +47,6 @@ public class WebImage extends WebViewClient{
 				InputStream is = context.getClassLoader().getResourceAsStream("com/androidquery/util/web_image.html");			
 				template = new String(AQUtility.toBytes(is));
 			}catch(Exception e){
-				AQUtility.debug(e);
 			}
 			
 		}
@@ -120,6 +119,7 @@ public class WebImage extends WebViewClient{
 		
 	}
 	
+	@SuppressWarnings("deprecation")
 	private void delaySetup(){
 		
 		wv.setPictureListener(new PictureListener() {

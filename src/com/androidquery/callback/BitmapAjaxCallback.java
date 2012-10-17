@@ -16,20 +16,18 @@
 
 package com.androidquery.callback;
 
-import java.io.File;
-import java.lang.ref.WeakReference;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
-
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
-import android.graphics.*;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
@@ -39,6 +37,14 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
+
+import java.io.File;
+import java.lang.ref.WeakReference;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 import com.androidquery.AQuery;
 import com.androidquery.auth.AccountHandle;
@@ -266,12 +272,13 @@ public class BitmapAjaxCallback extends AbstractAjaxCallback<Bitmap, BitmapAjaxC
 	        if(!width) dim = Math.max(dim, info.outHeight);
 	        int ssize = sampleSize(dim, target);
 
-	        options = new Options();	        
-//    		options.inJustDecodeBounds = false;
+	        options = new Options();
+    		options.inJustDecodeBounds = false;
     		options.inSampleSize = ssize;
-    		options.inPurgeable = true;
-    		options.inDither = false;
-    		options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+//    		options.inPurgeable = true;
+//    		options.inDither = false;
+//    		options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+    		options.inPreferredConfig = info.inPreferredConfig;
     	
     	}
         
